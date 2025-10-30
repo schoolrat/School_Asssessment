@@ -1,1 +1,103 @@
-#new update added to make game easier for each level
+import tkinter as tk
+
+# Define board parameters (keep consistent with previous code)
+SQUARE_SIZE = 60
+BOARD_SIZE = 8
+WINDOW_WIDTH = BOARD_SIZE * SQUARE_SIZE
+WINDOW_HEIGHT = BOARD_SIZE * SQUARE_SIZE
+
+# --- Define Color Themes (same as before) ---
+CHESS_THEMES = {
+    "wood": {
+        "light": "#F0D9B5",
+        "dark": "#B58863",
+        "title": "Classic Wood Board"
+    },
+    "green": {
+        "light": "#FFFFFF",
+        "dark": "#769656",
+        "title": "Tournament Green Board"
+    },
+    "blue": {
+        "light": "#DDE6ED",
+        "dark": "#5D7B99",
+        "title": "Evening Blue Board"
+    }
+}
+
+def create_board_gui(theme_name="wood"):
+    """
+    Sets up the main Tkinter window, draws the board, and adds click handling.
+    """
+    
+    theme = CHESS_THEMES.get(theme_name.lower(), CHESS_THEMES["wood"])
+    color1 = theme["light"]
+    color2 = theme["dark"]
+    
+    root = tk.Tk()
+    root.title(theme["title"])
+    
+    canvas = tk.Canvas(root, width=WINDOW_WIDTH, height=WINDOW_HEIGHT)
+    canvas.pack(padx=10, pady=10)
+    
+    # ----------------------------------------------------
+    # NEW FEATURE FUNCTION: Handle Mouse Clicks
+    # ----------------------------------------------------
+    def handle_click(event):
+        """Calculates the square coordinates from the mouse click event."""
+        
+        # 1. Determine the 0-indexed row and column based on click position
+        col = event.x // SQUARE_SIZE
+        row = event.y // SQUARE_SIZE
+        
+        # Guard clause: Ensure click is within the board boundaries
+        if 0 <= row < BOARD_SIZE and 0 <= col < BOARD_SIZE:
+            
+            # 2. Convert to Algebraic Notation
+            # Row 0 (top) is Rank 8; Row 7 (bottom) is Rank 1
+            rank = BOARD_SIZE - row
+            # Col 0 (left) is File 'a'; Col 7 (right) is File 'h'
+            file = chr(ord('a') + col)
+            
+            algebraic_coord = f"{file}{rank}"
+            
+            # 3. Print feedback to the console
+            print(f"Clicked Square: {algebraic_coord} (Row: {row}, Col: {col})")
+            
+            # Optional: Add a visual indicator to the clicked square (e.g., highlight)
+            # Find all previous highlight rectangles and delete them
+            canvas.delete("highlight") 
+            
+            # Draw a new highlight rectangle on the selected square
+            x1 = col * SQUARE_SIZE
+            y1 = row * SQUARE_SIZE
+            x2 = x1 + SQUARE_SIZE
+            y2 = y1 + SQUARE_SIZE
+            
+            # Use a semi-transparent color for highlighting
+            canvas.create_rectangle(x1, y1, x2, y2, 
+                                    outline="red", 
+                                    width=3, 
+                                    tags="highlight")
+
+
+    # 4. Draw the 8x8 checkerboard pattern (same as before)
+    for row in range(BOARD_SIZE):
+        for col in range(BOARD_SIZE):
+            color = color1 if (row + col) % 2 == 0 else color2
+            x1 = col * SQUARE_SIZE
+            y1 = row * SQUARE_SIZE
+            x2 = x1 + SQUARE_SIZE
+            y2 = y1 + SQUARE_SIZE
+            canvas.create_rectangle(x1, y1, x2, y2, fill=color, outline=color)
+
+    # 5. Bind the Left Mouse Button Click to the handler function
+    # '<Button-1>' is the standard code for the left mouse button
+    canvas.bind('<Button-1>', handle_click)
+    
+    # 6. Start the Tkinter event loop
+    root.mainloop()
+
+# --- Run the program with the 'blue' theme ---
+if __name__ == '__main__':
+    create_board_gui(theme_name="blue")
